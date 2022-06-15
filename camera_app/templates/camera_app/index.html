@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script>
+
+        // paste feature
+        window.addEventListener("paste", function(e) {
+            // cancel paste
+            e.preventDefault();
+
+            // get text representation of clipboard
+            var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+
+            // insert text manually
+            document.getElementById("task1").innerHTML = text;
+        });
+
+        // ajax-query to force clicked 'ctrl+c' key
+        $(document).ready(function() {
+            var ctrlDown = false,
+                ctrlKey = 17,
+                cKey = 67;
+
+            $(document).keydown(function(e) { if (e.keyCode == ctrlKey) ctrlDown = true; }).keyup(function(e) { if (e.keyCode == ctrlKey) ctrlDown = false; });
+
+            $(document).keydown(function(e) {
+                if (ctrlDown && (e.keyCode == cKey)) {
+                    $.ajax({
+                        url: '{% url "stored_data" %}',
+                        type: 'POST',
+                        data: {"pressed_key": e.key}
+                    }).done(function(data) { console.log(data); });
+                }
+            });
+        });
+
+        let should_record = false;
+        $(document).ready(function() {
+            $('#stop-recording-button').click(function() {
+                if (should_record) {
+                    document.getElementById("image-stream").style.display = 'none';
+                    document.getElementById("stop-recording-button").value = "Начать запись с видеокамеры";
+                    should_record = false;
+                } else {
+                    document.getElementById("image-stream").style.display = 'inline';
+                    document.getElementById("stop-recording-button").value = "Остановить запись с видеокамеры";
+                    should_record = true;
+                }
+            })
+        })
+
+    </script>
+</head>
+<body>
+    <img src="{% url 'test_stream' %}" id='image-stream' alt="">
+    <input type="button" id="stop-recording-button" value="Остановить запись с видеокамеры">
+    <p id="task1">
+
+    </p>
+</body>
+</html>
